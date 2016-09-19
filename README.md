@@ -11,7 +11,7 @@ C with Arduino IDE
 
 ## UAV Planned Feature :
 - GPS Positioning
-- ~~Semi-autonomous path-finder to go to USV Remote-controlled
+- ~~Semi-autonomous path-finder to go to USV~~ Remote-controlled
 - Position Stabilization on Air
 - Landing Algorithm to fit perfectly on the boat
 
