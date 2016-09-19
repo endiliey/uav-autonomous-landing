@@ -7,7 +7,7 @@ Collaborative mission between UAV (Unmanned Aerial Vehicle) and USV (Unmanned Su
 ## Programming Language :
 C with Arduino IDE
 
-## Brief description : UAV will be equipped with camera to detect survivors and will collect 
+## Brief description : UAV will be equipped with camera to detect survivors. In case of out-of-battery usage, USV will be used as a battery charge point (through Wireless Charging Method)
 
 ## UAV Planned Feature :
 - GPS Positioning
