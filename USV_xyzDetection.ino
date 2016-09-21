@@ -9,6 +9,8 @@
 #define trigPin3 1
 #define echoPin3 13
 
+//Hi i am richard
+
 
 #include <SoftwareSerial.h> // We need SoftwareSerialLibrary to allow serial communication to take place on other digital pins of the board
 
