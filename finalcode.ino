@@ -85,6 +85,5 @@ void loop() {
             Serial.println(width); // this will be the height of object detected by pixy
   }    
   
-  delay(500);
 
 }
