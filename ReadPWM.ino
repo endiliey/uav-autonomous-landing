@@ -4,57 +4,78 @@
  *  The purpose of this program is to get the PWM Value from Radio Controller
  */
 
-#define yawPin 5 //ch1
-#define pitchPin 6 //ch2
-#define throttlePin 3 //ch3
-#define rollPin 11 //ch4
-#define ch5Pin 9 //ch5
-#define ch6Pin 10 //ch6
+#include <PinChangeInterrupt.h>
 
-
-int ch1;
-int ch2;
-int ch3;
-int ch4;
-int ch5;
-int ch6;
+const byte channel_pin[] = {2,3,4,5,6,7};
+volatile unsigned long rising_start[] = {0,0,0,0,0,0};
+volatile long channel_length[] = {0,0,0,0,0,0};
 
 void setup() {
-  // put your setup code here, to run once:
-pinMode(yawPin, INPUT);
-pinMode(pitchPin, INPUT);
-pinMode(throttlePin, INPUT);
-pinMode(rollPin, INPUT);
-pinMode(ch5Pin, INPUT);
-pinMode(ch6Pin, INPUT);
+  Serial.begin(9600);
 
-Serial.begin(9600);
-Serial.println("Starting soon.. ");
+  pinMode(channel_pin[0], INPUT);
+  pinMode(channel_pin[1], INPUT);
+  pinMode(channel_pin[2], INPUT);
+  pinMode(channel_pin[3], INPUT);
+  pinMode(channel_pin[4], INPUT);
+  pinMode(channel_pin[5], INPUT);
+  
+  attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[0]), onRising0, CHANGE);
+  attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[1]), onRising1, CHANGE);
+  attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[2]), onRising2, CHANGE);
+  attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[3]), onRising3, CHANGE);
+  attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[4]), onRising4, CHANGE);
+  attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[5]), onRising5, CHANGE);
+}
+
+void processPin(byte pin) {
+  uint8_t trigger = getPinChangeInterruptTrigger(digitalPinToPCINT(channel_pin[pin]));
+
+  if(trigger == RISING) {
+    rising_start[pin] = micros();
+  } else if(trigger == FALLING) {
+    channel_length[pin] = micros() - rising_start[pin];
+  }
+}
+
+void onRising0(void) {
+  processPin(0);
+}
+
+void onRising1(void) {
+  processPin(1);
+}
+
+void onRising2(void) {
+  processPin(2);
+}
+
+void onRising3(void) {
+  processPin(3);
+}
+
+void onRising4(void) {
+  processPin(4);
+}
+
+void onRising5(void) {
+  processPin(5);
 }
 
 void loop() {
-
-  ch1 = pulseIn(yawPin,HIGH); //yaw - >(most left = 2005, most right = 959)
-  ch2 = pulseIn(pitchPin,HIGH); //pitch -> (most top 2006, most bottom = 939)
-  ch3 = pulseIn(throttlePin,HIGH); // throttle -> (most top = 979, most bottom = 2034)
-  ch4 = pulseIn(rollPin,HIGH); //roll -> (most left = 985, most right = 1998)
-  ch5 = pulseIn(ch5Pin,HIGH); //ch5 -> ( on(toward us) = 2018 , off = 929)
-  ch6 = pulseIn(ch6Pin,HIGH); //ch6 - > (on = 2018, off = 929)
-
-  Serial.println("Yaw        Pitch      Throttle         Roll       CH5        CH6"); // Print the value of 
-  Serial.print(ch1);
-  Serial.print("         ");
-  Serial.print(ch2);
-  Serial.print("         ");
-  Serial.print(ch3);
-  Serial.print("         ");
-  Serial.print(ch4);
-  Serial.print("         ");
-  Serial.print(ch5);
-  Serial.print("         ");
-  Serial.print(ch6);
-  Serial.println("");
+  //Serial.println("Yaw | Pitch | Ch6 | Roll | Ch5 | Throttle |");
+  Serial.print(channel_length[0]); //yaw
+  Serial.print(" | ");
+  Serial.print(channel_length[1]); //pitch
+  Serial.print(" | ");
+  Serial.print(channel_length[2]); // ch6
+  Serial.print(" | ");
+  Serial.print(channel_length[3]); // roll
+  Serial.print(" | ");
+  Serial.print(channel_length[4]); // ch5
+  Serial.print(" | ");
+  Serial.print(channel_length[5]); //throttle
+  Serial.println(""); 
   
-  delay(150);
-
+  //delay(100);
 }
