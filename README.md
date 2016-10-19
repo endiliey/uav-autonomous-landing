@@ -15,9 +15,9 @@ This project is mainly about coding our Quadcopter to fulfill the collaborative 
 
 We are using Arduino as an intermediary between the radio controller and our quadcopter. 
 Our quadcopter have two modes :
-1. Autoland mode
+###1. Autoland mode
 When switch channel 5 is turned on, our copter will detect the landing platform by itself and hover to it as well as landing. Any external input from us (from radio controller) is ignored, except the switch channel 5 mode.
-2. Manual mode
+###2. Manual mode
 When switch channel 5 is turned off, our copter will be manually controlled by our radio controller.
 
 ## When will your project be finished ?
