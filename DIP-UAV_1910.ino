@@ -2,7 +2,7 @@
  /* Do not change anything if you don't know what you are doing
  *  18/10/16
  *  This is the on-board code for our drones
- *  It has 3 functions : getting PWM value from receiver (6 channels input), getting object coordinates (Computer Vision input) , and outputting PPM Signal to flight controller (1 output only) with some algorithm to make sure it can autoland / controlled manually
+ *  It have 3 functions : getting PWM value from receiver (6 channels input), getting object coordinates (Computer Vision input) , and outputting PPM Signal to flight controller (1 output only) with some algorithm to make sure it can autoland / controlled manually
  *  Designed for DIP Project B Team 
  *  Coder In-charge : Endilie Yacop Sucipto
  *  Contributor : Tee Chin Kiat, Dou Zi
@@ -12,13 +12,13 @@
 #define CHANNEL_DEFAULT_VALUE 1500  //set the default servo value
 #define SWITCH_OFF_VALUE 900 // set the default "off" switch value, in this case we use 900 because the Turnigy range from 900-2000
 #define SWITCH_ON_VALUE 2000 // set the default "on" switch value, in this case we use 2000
-#define FRAME_LENGTH 22500  //set the PPM frame length in microseconds (1ms = 1000µs)
+#define FRAME_LENGTH 15000  //set the PPM frame length in microseconds (1ms = 1000µs)
 #define PULSE_LENGTH 300  //set the pulse length
 #define THROTTLE_LANDING_VALUE 900 // please change this with the value of throttle when its going to DESCEND (THE 900 VALUE IS ASSUMPTION BY ENDI)
 #define LANDING_HEIGHT_VALUE 50 // please change this with the value of object height when the drones are very near with the object (like ~20cm distant apart)
 #define LANDING_WIDTH_VALUE 50 // please change this with the value of object width when the drones are very near with the object (like ~20cm distant apart)
 #define onState 1  //set polarity of the pulses: 1 is positive, 0 is negative
-#define sigPin 9  //set PPM signal output pin on the arduino
+#define sigPin 8  //set PPM signal output pin on the arduino
 #include <SPI.h>  // include SPI interface, note that by using this, pin 10,11,12,13 cannot be used (take note for our project seriously)
 #include <Pixy.h> // include Pixy header files, this is the basic header to get Pixy method functioning
 #include <PinChangeInterrupt.h> // include hardware interrupt libraries to get PWM input without lot of delay (usually we use PulseIn which gives lot of delay)
@@ -182,39 +182,39 @@ void loop() {
 
 
   /*This store the PWM Value that we get to its respective variable (just for easier readability), rather than having channel_length[0], we use yaw instead*/
-  yaw = channel_length[0];
+  roll = channel_length[0];
   pitch = channel_length[1];
   ch6 = channel_length[2];
-  roll =channel_length[3];
+  yaw =channel_length[3];
   ch5 = channel_length[4];
   throttle = channel_length[5];
   
   /*This is only for debugging, it will be commented out later on*/
-  Serial.print(yaw); //yaw
-  Serial.print(" | ");
-  Serial.print(roll); 
+  /*Serial.print(roll); //yaw
   Serial.print(" | ");
   Serial.print(pitch); 
   Serial.print(" | ");
   Serial.print(throttle); 
   Serial.print(" | ");
+  Serial.print(yaw); 
+  Serial.print(" | ");
   Serial.print(ch5); 
   Serial.print(" | ");
   Serial.print(ch6);
   Serial.println(""); 
-  
+*/
  
   /* Here we get the x,y, height and coordinate values of object detected */
   if (pixy.getBlocks() > 0)
   {
 
-            x = (pixy.blocks[0].x) - 160 ;
-            y = -1 * ((pixy.blocks[0].y) - 100) ;
-            height = pixy.blocks[0].height;
-            width = pixy.blocks[0].width;
+        x = (pixy.blocks[0].x) - 160 ;
+        y = -1 * ((pixy.blocks[0].y) - 100) ;
+        height = pixy.blocks[0].height;
+        width = pixy.blocks[0].width;
 
   /*This part is only for debugging, we will comment this out later on */
-            Serial.println("Detected: ");
+ /* Serial.println("Detected: ");
             Serial.println("x    y    height  width");
             Serial.print(x); //this will be the x value of object detected by Pixy
             Serial.print("    ");
@@ -223,42 +223,108 @@ void loop() {
             Serial.print(height);// this will be the width of object detected by pixy
             Serial.print("    "); 
             Serial.println(width); // this will be the height of object detected by pixy
+  */
   }    
 
    /*
-    Here we can modify ppm array (ppm[0] until ppm[5]) and set any channel to desired value 
-    (in our DIP case, we will use between 900 and 2000 for the four main channel, and either 900/2000 for CH5 and CH6). 
+    Here we can modify ppm array (ppm[0] until ppm[5]) and set any channel to value (in our DIP case, we will use between 900 and 2000 for the four main channel, and either 900/2000 for CH5 and CH6). 
     Timer running in the background will take care of the rest and automatically 
     generate PPM signal on output pin using values in ppm array
-  */
-    if (ch5 >= SWITCH_ON_VALUE)// autoland mode is ON
-    {
-      /*Put some landing algorithm here.  I'm not really sure about this.
-      if (x <= 50 && y <= 50 && height == LANDING_HEIGHT_VALUE && width == LANDING_WIDTH_VALUE) // if the landing platform is already very near & at the center, the copter will just throttle down
-      {
-              ppm[0] = CHANNEL_DEFAULT_VALUE;
-              ppm[1] = CHANNEL_DEFAULT_VALUE;
-              ppm[2] = CHANNEL_DEFAULT_VALUE;
-              ppm[3] = THROTTLE_LANDING_VALUE;
-              ppm[4] = SWITCH_OFF_VALUE;
-              ppm[5] = SWITCH_OFF_VALUE;
-      }
-      /*
-    /*Put some other landing algorithm code, it should be simple and quite fast because our main landing algorithm is more of modifying all the channel value that will be inputted to the flight controller*/
-    
-     
-    }
-    else // if channel 5 is not switched on, we just make the PPM generate the exact value with our PWM Value ( This means MANUAL MODE)
-    {
-      ppm[0] = yaw;
-      ppm[1] = roll;
-      ppm[2] = pitch;
-      ppm[3] = throttle;
+    */
+
+   if ( ch5 >= SWITCH_OFF_VALUE && ch5 <= SWITCH_ON_VALUE )
+   {
+      ppm[0] = roll;
+      ppm[1] = pitch;
+      ppm[2] = throttle;
+      ppm[3] = yaw;
       ppm[4] = ch5;
       ppm[5] = ch6;
-    }
-    
+   }
+   else if ( ch5 >= SWITCH_ON_VALUE && pixy.getBlocks() > 0) 
+   {
+         ppm[3] = CHANNEL_DEFAULT_VALUE;
+         ppm[4] = ch5;
+         ppm[5] = ch6;
+      if ( x >= -10 && x <= 10 && y >= -10 && y <= 10 )
+      {
+          ppm[0] = CHANNEL_DEFAULT_VALUE;
+          ppm[1] = CHANNEL_DEFAULT_VALUE;
+          Serial.println("Will land");
+             if (height <= 50)
+             {
+              ppm[2] = 1200;
+             }
+             else if (height >= 50 && height <= 200)
+             {
+              ppm[2] = 1000;;
+             }
+             else if (height >= 200)
+             {
+              ppm[2] = 900;
+             }
+      }
+      else 
+      {
+          if (x >= 10)
+          {
+            ppm[0] = 1300;
+            Serial.println("Will roll to the left");
+          }
+          else if (x <= -10)
+          {
+            ppm[0] = 1700;
+            Serial.println("Will roll to the right");
+          }
+          else
+          {
+            ppm[0] = CHANNEL_DEFAULT_VALUE;
+          }
   
+          
+          if (y >= 10)
+          {
+             ppm[1] = 1300; 
+             Serial.println("Will pitch to bottom");    
+          }
+          else if (y <= -10)
+          {
+            ppm[1] = 1700;
+            Serial.println("Will pitch to up");
+          }
+          else
+          {
+            ppm[0] = CHANNEL_DEFAULT_VALUE;
+          }
+                
+       }
+    
+   }
+   else
+   {
+      ppm[0] = roll;
+      ppm[1] = pitch;
+      ppm[2] = throttle;
+      ppm[3] = yaw;
+      ppm[4] = ch5;
+      ppm[5] = ch6;
+   }
+      
+     
+      /*Serial.print(ppm[0]);
+      Serial.print(" | ");
+      Serial.print(ppm[1]);
+      Serial.print(" | ");
+      Serial.print(ppm[2]);
+      Serial.print(" | ");
+      Serial.print(ppm[3]);
+      Serial.print(" | ");
+      Serial.print(ppm[4]);
+      Serial.print(" | ");
+      Serial.print(ppm[5]);
+      Serial.println("");
+      */
+
+  //delay(100);
     /*This delay is really needed, because anything less than 20ms will bog down the arduino and cause error because Arduino can't compute Computer Vision faster than this*/
-      delay(20);
 }
