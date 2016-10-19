@@ -2,7 +2,7 @@
  /* Do not change anything if you don't know what you are doing
  *  18/10/16
  *  This is the on-board code for our drones
- *  It have 3 functions : getting PWM value from receiver (6 channels input), getting object coordinates (Computer Vision input) , and outputting PPM Signal to flight controller (1 output only) with some algorithm to make sure it can autoland / controlled manually
+ *  It has 3 functions : getting PWM value from receiver (6 channels input), getting object coordinates (Computer Vision input) , and outputting PPM Signal to flight controller (1 output only) with some algorithm to make sure it can autoland / controlled manually
  *  Designed for DIP Project B Team 
  *  Coder In-charge : Endilie Yacop Sucipto
  *  Contributor : Tee Chin Kiat, Dou Zi
@@ -208,13 +208,13 @@ void loop() {
   if (pixy.getBlocks() > 0)
   {
 
-        x = (pixy.blocks[0].x) - 160 ;
-        y = -1 * ((pixy.blocks[0].y) - 100) ;
-        height = pixy.blocks[0].height;
-        width = pixy.blocks[0].width;
+            x = (pixy.blocks[0].x) - 160 ;
+            y = -1 * ((pixy.blocks[0].y) - 100) ;
+            height = pixy.blocks[0].height;
+            width = pixy.blocks[0].width;
 
   /*This part is only for debugging, we will comment this out later on */
-  Serial.println("Detected: ");
+            Serial.println("Detected: ");
             Serial.println("x    y    height  width");
             Serial.print(x); //this will be the x value of object detected by Pixy
             Serial.print("    ");
@@ -226,7 +226,8 @@ void loop() {
   }    
 
    /*
-    Here we can modify ppm array (ppm[0] until ppm[5]) and set any channel to value (in our DIP case, we will use between 900 and 2000 for the four main channel, and either 900/2000 for CH5 and CH6). 
+    Here we can modify ppm array (ppm[0] until ppm[5]) and set any channel to desired value 
+    (in our DIP case, we will use between 900 and 2000 for the four main channel, and either 900/2000 for CH5 and CH6). 
     Timer running in the background will take care of the rest and automatically 
     generate PPM signal on output pin using values in ppm array
   */
@@ -259,5 +260,5 @@ void loop() {
     
   
     /*This delay is really needed, because anything less than 20ms will bog down the arduino and cause error because Arduino can't compute Computer Vision faster than this*/
-   delay(20);
+      delay(20);
 }
