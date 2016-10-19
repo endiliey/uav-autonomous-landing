@@ -20,6 +20,11 @@ When switch channel 5 is turned on, our copter will detect the landing platform 
 2. Manual mode
 When switch channel 5 is turned off, our copter will be manually controlled by our radio controller.
 
+## When will your project be finished ?
+Since this is a school project, we will have to complete this by 9th November 2016. We will put a video on youtube when we've finished testing and put it here ! And a more proper documentation from scratch on how to build a low-cost drones will be done after my final exam (1 December 2016).
+
+So Stay Tune !!
+
 ## FAQ
 1. Why do you use Pixy detection instead of using openCV + Python ?
 At first, we wanted to use openCV with python as it is generally easier. However, openCV is a very big library which need a high-level computation (at least Raspberry PI), and Arduino won't be able to run the openCV without the help of any computer computation. Other reason includes, other team members are not familiar with Raspberry Pi and are more comfortable with Arduino
