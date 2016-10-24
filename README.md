@@ -34,17 +34,20 @@ Simply help us to make the code more efficient (but not decreasing so much reada
 ## Current Problem
 ###We are thinking of an efficient landing algorithm
 Problem can be simplified into; 
-Given
-Input : x,y (cartesian coordinate of x-y plane) and height of target from Computer Vision Perspective (assume height = 200 means object is within 10 cm of Target, while height = 50 means object is within 160 cm from object)
+Calling all drones hobbyist/hackers/makers/etc
 
-Output : value of Throttle, Roll, Yaw and Pitch (such that the Drone will land in the center of Target (assume |x,y| = |10,10| )
+###Given 
+####Input : x,y, height
 
-Info for those who are now aware of Throttle, Roll, Yaw and Pitch
+####Input info :
+#####1. x,y is the cartesian coordinates in x-y plane with x = 0, y =0 in the middle
+#####2.assume height = 200 means object is within 10 cm of Target, while height = 50 means object is within 160 cm from object)
+
+###Output : value of Throttle, Roll, Yaw and Pitch 
+(such that the Drone will land in the center of Target (assume |x,y| = |10,10| )
+
+####Output info :
+#####1. Basic drones control
 http://www.robolink.com/basics-of-codrone-control/
-
-Throttle, Roll, Yaw and Pitch value is a PWM value ranging between 900 to 2000 (with 900 = low, 1500 = default, 2000 = HIGH)
-Example : A roll PWM Value of 2000 will means that the drone will tilt to the right
-
-Thanks :)
-
-Endi
+#####2. Throttle, Roll, Yaw and Pitch value is a PWM (Pulse width modulation) value ranging between 900 to 2000 (with 900 = low, 1500 = default, 2000 = HIGH)
+Example : A roll PWM Value of 2000 will means that the drone will tilt to the right aggresively
