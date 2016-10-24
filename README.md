@@ -31,13 +31,13 @@ At first, we wanted to use openCV with python as it is generally easier. However
 2. How can we help you for this project?
 Simply help us to make the code more efficient (but not decreasing so much readability)
 
-## Current Problem that Need to be Solved
+## Current Problem
 ###We are thinking of an efficient landing algorithm
 Problem can be simplified into; 
 Given
 Input : x,y (cartesian coordinate of x-y plane) and height of target from Computer Vision Perspective (assume height = 200 means object is within 10 cm of Target, while height = 50 means object is within 160 cm from object)
 
-Output : value of Throttle, Roll, Yaw and Pitch
+Output : value of Throttle, Roll, Yaw and Pitch (such that the Drone will land in the center of Target (assume |x,y| = |10,10| )
 
 Info for those who are now aware of Throttle, Roll, Yaw and Pitch
 http://www.robolink.com/basics-of-codrone-control/
