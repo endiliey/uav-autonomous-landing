@@ -19,9 +19,14 @@
 #define LANDING_WIDTH_VALUE 50 // please change this with the value of object width when the drones are very near with the object (like ~20cm distant apart)
 #define onState 1  //set polarity of the pulses: 1 is positive, 0 is negative
 #define sigPin 8  //set PPM signal output pin on the arduino
+#define LANDING_X_VALUE 10 // set the desired landing area (more of error-tolerance within X)
+#define LANDING_Y_VALUE 10 // set the desired landing area (Y error-tolerance)
+#define TURNING_SPEED 200 // set the desired turning speed. The bigger it is, the faster it move for autolanding
+#define LANDING_SPEED_FACTOR 1.2 // set the desired landing speed (make sure its around 1). Bigger numbers = faster throttle down for autolanding
 #include <SPI.h>  // include SPI interface, note that by using this, pin 10,11,12,13 cannot be used (take note for our project seriously)
 #include <Pixy.h> // include Pixy header files, this is the basic header to get Pixy method functioning
 #include <PinChangeInterrupt.h> // include hardware interrupt libraries to get PWM input without lot of delay (usually we use PulseIn which gives lot of delay)
+
 Pixy pixy; // Create an instances of Pixy class named pixy
 
 /*this array is the global variable needed to get and store PWM valuee*/
@@ -29,11 +34,13 @@ const byte channel_pin[] = {2,3,4,5,6,7};
 volatile unsigned long rising_start[] = {0,0,0,0,0,0};
 volatile long channel_length[] = {0,0,0,0,0,0};
 
-/*this array holds the x,y,height and width value of the landing platform detected by our camera */
+/*this array holds the x,y,height and width value of the landing platform detected by our camera as well as the autoLand variable */
 int x;
 int y;
 int height;
 int width;
+bool autoLand =false;
+bool objectFound = false;
 
 /*To make things readable, we create an arrays to hold the yaw, throttle, pitch, roll and ch5,ch6 PWM Value */
 volatile long yaw;
@@ -177,10 +184,27 @@ void loop() {
   Serial.print(" | ");
   Serial.print(ch6);
   Serial.println(""); 
-*/
+   */
+         if ( pixy.GetBlocks() > 0 )
+         {
+          objectFound = true;
+         }  
+         else
+         {
+          objectFound = false;
+         }
+ 
+         if ( ch5 >= SWITCH_OFF_VALUE && ch5 <= SWITCH_ON_VALUE )
+         {
+          autoLand = false;
+         }
+         else
+         {
+          autoLand = true;
+         }
  
   /* Here we get the x,y, height and coordinate values of object detected */
-  if (pixy.getBlocks() > 0)
+  if (objectFound = true && autoLand == true)
   {
 
         x = (pixy.blocks[0].x) - 160 ;
@@ -207,7 +231,7 @@ void loop() {
     generate PPM signal on output pin using values in ppm array
     */
 
-   if ( ch5 >= SWITCH_OFF_VALUE && ch5 <= SWITCH_ON_VALUE )
+   if ( autoLand == false || objectFound == false )
    {
       ppm[0] = roll;
       ppm[1] = pitch;
@@ -216,17 +240,20 @@ void loop() {
       ppm[4] = ch5;
       ppm[5] = ch6;
    }
-   else if ( ch5 >= SWITCH_ON_VALUE && pixy.getBlocks() > 0) 
+   else 
    {
          ppm[3] = CHANNEL_DEFAULT_VALUE;
          ppm[4] = ch5;
          ppm[5] = ch6;
-      if ( x >= -10 && x <= 10 && y >= -10 && y <= 10 )
+    
+      if ( x >= (-1 *LANDING_X_VALUE) && x <= LANDING_X_VALUE && y >= (-1 * LANDING_Y_VALUE) && y <= LANDING_Y_VALUE )
       {
           ppm[0] = CHANNEL_DEFAULT_VALUE;
           ppm[1] = CHANNEL_DEFAULT_VALUE;
           Serial.println("Will land");
-             if (height <= 50)
+          ppm[2] = THROTTLE_LANDING_VALUE + ( LANDING_SPEED_FACTOR * (LANDING_HEIGHT_VALUE - height) )     
+            
+           /*if (height <= 50)
              {
               ppm[2] = 1200;
              }
@@ -238,17 +265,18 @@ void loop() {
              {
               ppm[2] = 900;
              }
+           */
       }
       else 
       {
-          if (x >= 10)
+          if (x >= LANDING_X_VALUE)
           {
-            ppm[0] = 1300;
+            ppm[0] = CHANNEL_DEFAULT_VALUE - TURNING_SPEED;
             Serial.println("Will roll to the left");
           }
-          else if (x <= -10)
+          else if (x <= (-1 * LANDING_X_VALUE) )
           {
-            ppm[0] = 1700;
+            ppm[0] = CHANNEL_DEFAULT_VALUE + TURNING_SPEED;
             Serial.println("Will roll to the right");
           }
           else
@@ -257,14 +285,14 @@ void loop() {
           }
   
           
-          if (y >= 10)
+          if (y >= LANDING_Y_VALUE)
           {
-             ppm[1] = 1300; 
+             ppm[1] = CHANNEL_DEFAULT_VALUE - TURNING_SPEED; 
              Serial.println("Will pitch to bottom");    
           }
-          else if (y <= -10)
+          else if (y <= (-1 * LANDING_Y_VALUE) )
           {
-            ppm[1] = 1700;
+            ppm[1] = CHANNEL_DEFAULT_VALUE + TURNING_SPEED;
             Serial.println("Will pitch to up");
           }
           else
@@ -274,15 +302,6 @@ void loop() {
                 
        }
     
-   }
-   else
-   {
-      ppm[0] = roll;
-      ppm[1] = pitch;
-      ppm[2] = throttle;
-      ppm[3] = yaw;
-      ppm[4] = ch5;
-      ppm[5] = ch6;
    }
       
      
