@@ -84,12 +84,12 @@ void setup()
     pinMode(channel_pin[4], INPUT);
     pinMode(channel_pin[5], INPUT);
   
-    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[0]), onRising0, CHANGE); //this will attach interrupt to the pin as well as calling the PWM reading function
-    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[1]), onRising1, CHANGE);
-    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[2]), onRising2, CHANGE);
-    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[3]), onRising3, CHANGE);
-    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[4]), onRising4, CHANGE);
-    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[5]), onRising5, CHANGE);
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[0]), processPin(0), CHANGE); //this will attach interrupt to the pin as well as calling the PWM reading function
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[1]), processPin(1), CHANGE);
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[2]), processPin(2), CHANGE);
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[3]), processPin(3), CHANGE);
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[4]), processPin(4), CHANGE);
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[5]), processPin(5), CHANGE);
 
     /* Initialization for our pixy camera*/
     pixy.init();
@@ -112,31 +112,6 @@ void setup()
         {
           channel_length[pin] = micros() - rising_start[pin];
         }
-  }
-
-
-  void onRising0(void) {
-    processPin(0);
-  }
-  
-  void onRising1(void) {
-    processPin(1);
-  }
-  
-  void onRising2(void) {
-    processPin(2);
-  }
-  
-  void onRising3(void) {
-    processPin(3);
-  }
-  
-  void onRising4(void) {
-    processPin(4);
-  }
-  
-  void onRising5(void) {
-    processPin(5);
   }
 
 //Leave this alone, it's the timer that will handle the PPM Signal Generation//
