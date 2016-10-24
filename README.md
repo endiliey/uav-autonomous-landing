@@ -31,6 +31,20 @@ At first, we wanted to use openCV with python as it is generally easier. However
 2. How can we help you for this project?
 Simply help us to make the code more efficient (but not decreasing so much readability)
 
+## Current Problem that Need to be Solved
+We are thinking of an efficient landing algorithm
+Problem can be simplified into; 
+Given
+Input : x,y (cartesian coordinate of x-y plane) and height of target from Computer Vision Perspective (assume height = 200 means object is within 10 cm of Target, while height = 50 means object is within 160 cm from object)
+
+Output : value of Throttle, Roll, Yaw and Pitch
+
+Info for those who are now aware of Throttle, Roll, Yaw and Pitch
+http://www.robolink.com/basics-of-codrone-control/
+
+Throttle, Roll, Yaw and Pitch value is a PWM value ranging between 900 to 2000 (with 900 = low, 1500 = default, 2000 = HIGH)
+Example : A roll PWM Value of 2000 will means that the drone will tilt to the right
+
 Thanks :)
 
 Endi
