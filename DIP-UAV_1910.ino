@@ -21,7 +21,7 @@
 #define sigPin 8  //set PPM signal output pin on the arduino
 #define LANDING_X_VALUE 10 // set the desired landing area (more of error-tolerance within X)
 #define LANDING_Y_VALUE 10 // set the desired landing area (Y error-tolerance)
-#define TURNING_SPEED 200 // set the desired turning speed. The bigger it is, the faster it move for autolanding
+#define TURNING_SPEED 200 // set the desired turning speed. The bigger it is, the faster the drones turn/ move itself for autolanding
 #define LANDING_SPEED_FACTOR 1.2 // set the desired landing speed (make sure its around 1). Bigger numbers = faster throttle down for autolanding
 #include <SPI.h>  // include SPI interface, note that by using this, pin 10,11,12,13 cannot be used (take note for our project seriously)
 #include <Pixy.h> // include Pixy header files, this is the basic header to get Pixy method functioning
