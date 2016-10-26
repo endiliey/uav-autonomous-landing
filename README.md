@@ -7,7 +7,7 @@ This project is mainly about coding our Quadcopter to fulfill the collaborative 
 - Naze32 ~ flight controller with Cleanflight firmware
 - Turnigy 6x ~ radio controller
 - Turnigy XR7000 ~ receiver
-- Arduino UNO ~ as the brain of our quadcopter
+- Arduino Nano ~ as the brain of our quadcopter
 - Pixy Camera ~ for our On-board object detector
 
 ## Programming Language : C with Arduino IDE
@@ -22,8 +22,6 @@ When switch channel 5 is turned off, our copter will be manually controlled by o
 
 ## When will your project be finished ?
 Since this is a school project, we will have to complete this by 9th November 2016. We will put a video on youtube when we've finished testing and put it here ! And a more proper documentation from scratch on how to build a low-cost drones will be done after my final exam (1 December 2016).
-
-So Stay Tune !!
 
 ## FAQ
 1. Why do you use Pixy detection instead of using openCV + Python ?
