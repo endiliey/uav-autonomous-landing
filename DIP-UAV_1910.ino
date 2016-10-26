@@ -15,14 +15,14 @@
 #define FRAME_LENGTH 15000  //set the PPM frame length in microseconds (1ms = 1000µs)
 #define PULSE_LENGTH 300  //set the pulse length
 #define THROTTLE_LANDING_VALUE 900 // please change this with the value of throttle when its going to DESCEND (THE 900 VALUE IS ASSUMPTION BY ENDI)
-#define LANDING_HEIGHT_VALUE 50 // please change this with the value of object height when the drones are very near with the object (like ~20cm distant apart)
-#define LANDING_WIDTH_VALUE 50 // please change this with the value of object width when the drones are very near with the object (like ~20cm distant apart)
+#define LANDING_HEIGHT_VALUE 200 // please change this with the value of object height when the drones are very near with the object (like ~20cm distant apart)
+#define LANDING_WIDTH_VALUE 200 // please change this with the value of object width when the drones are very near with the object (like ~20cm distant apart)
 #define onState 1  //set polarity of the pulses: 1 is positive, 0 is negative
 #define sigPin 8  //set PPM signal output pin on the arduino
-#define LANDING_X_VALUE 10 // set the desired landing area (more of error-tolerance within X)
-#define LANDING_Y_VALUE 10 // set the desired landing area (Y error-tolerance)
+#define LANDING_X_VALUE 20 // set the desired landing area (more of error-tolerance within X)
+#define LANDING_Y_VALUE 20 // set the desired landing area (Y error-tolerance)
 #define TURNING_SPEED 200 // set the desired turning speed. The bigger it is, the faster the drones turn/ move itself for autolanding
-#define LANDING_SPEED_FACTOR 1.2 // set the desired landing speed (make sure its around 1). Bigger numbers = faster throttle down for autolanding
+#define LANDING_SPEED_FACTOR 1.7 // set the desired landing speed (make sure its around 1). Bigger numbers = faster throttle down for autolanding
 #include <SPI.h>  // include SPI interface, note that by using this, pin 10,11,12,13 cannot be used (take note for our project seriously)
 #include <Pixy.h> // include Pixy header files, this is the basic header to get Pixy method functioning
 #include <PinChangeInterrupt.h> // include hardware interrupt libraries to get PWM input without lot of delay (usually we use PulseIn which gives lot of delay)
@@ -39,7 +39,7 @@ int x;
 int y;
 int height;
 int width;
-bool autoLand =false;
+bool autoLand = false;
 bool objectFound = false;
 
 /*To make things readable, we create an arrays to hold the yaw, throttle, pitch, roll and ch5,ch6 PWM Value */
@@ -91,12 +91,12 @@ void setup()
     pinMode(channel_pin[4], INPUT);
     pinMode(channel_pin[5], INPUT);
   
-    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[0]), processPin(0), CHANGE); //this will attach interrupt to the pin as well as calling the PWM reading function
-    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[1]), processPin(1), CHANGE);
-    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[2]), processPin(2), CHANGE);
-    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[3]), processPin(3), CHANGE);
-    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[4]), processPin(4), CHANGE);
-    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[5]), processPin(5), CHANGE);
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[0]), onRising0, CHANGE); //this will attach interrupt to the pin as well as calling the PWM reading function
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[1]), onRising1, CHANGE);
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[2]), onRising2, CHANGE);
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[3]), onRising3, CHANGE);
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[4]), onRising4, CHANGE);
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channel_pin[5]), onRising5, CHANGE);
 
     /* Initialization for our pixy camera*/
     pixy.init();
@@ -120,6 +120,31 @@ void setup()
           channel_length[pin] = micros() - rising_start[pin];
         }
   }
+
+    void onRising0(void) {
+    processPin(0);
+  }
+  
+  void onRising1(void) {
+    processPin(1);
+  }
+  
+  void onRising2(void) {
+    processPin(2);
+  }
+  
+  void onRising3(void) {
+    processPin(3);
+  }
+  
+  void onRising4(void) {
+    processPin(4);
+  }
+  
+  void onRising5(void) {
+    processPin(5);
+  }
+
 
 //Leave this alone, it's the timer that will handle the PPM Signal Generation//
 ISR(TIMER1_COMPA_vect)
@@ -164,19 +189,19 @@ void loop() {
 
 
   /*This store the PWM Value that we get to its respective variable (just for easier readability), rather than having channel_length[0], we use yaw instead*/
-  roll = channel_length[0];
-  pitch = channel_length[1];
-  ch6 = channel_length[2];
+  throttle = channel_length[0];
+  roll = channel_length[1];
+  pitch = channel_length[2];
   yaw =channel_length[3];
   ch5 = channel_length[4];
-  throttle = channel_length[5];
-  
+  ch6 = channel_length[5];
+
   /*This is only for debugging, it will be commented out later on*/
-  /*Serial.print(roll); //yaw
+  Serial.print(throttle); //yaw
+  Serial.print(" | ");
+  Serial.print(roll); 
   Serial.print(" | ");
   Serial.print(pitch); 
-  Serial.print(" | ");
-  Serial.print(throttle); 
   Serial.print(" | ");
   Serial.print(yaw); 
   Serial.print(" | ");
@@ -184,14 +209,16 @@ void loop() {
   Serial.print(" | ");
   Serial.print(ch6);
   Serial.println(""); 
-   */
-         if ( pixy.GetBlocks() > 0 )
+  
+         if ( pixy.getBlocks() > 0 )
          {
           objectFound = true;
+          //Serial.println("Object initialization found");
          }  
          else
          {
           objectFound = false;
+          //Serial.println("Object not found");
          }
  
          if ( ch5 >= SWITCH_OFF_VALUE && ch5 <= SWITCH_ON_VALUE )
@@ -204,7 +231,7 @@ void loop() {
          }
  
   /* Here we get the x,y, height and coordinate values of object detected */
-  if (objectFound = true && autoLand == true)
+  if (objectFound == true && autoLand == true)
   {
 
         x = (pixy.blocks[0].x) - 160 ;
@@ -231,16 +258,17 @@ void loop() {
     generate PPM signal on output pin using values in ppm array
     */
 
-   if ( autoLand == false || objectFound == false )
+   if ( objectFound == false )
    {
-      ppm[0] = roll;
-      ppm[1] = pitch;
-      ppm[2] = throttle;
+      //Serial.println("Object not found, manual mode");
+      ppm[0] = throttle;
+      ppm[1] = roll;
+      ppm[2] = pitch;
       ppm[3] = yaw;
       ppm[4] = ch5;
       ppm[5] = ch6;
    }
-   else 
+   else if ( autoLand == true && objectFound == true)
    {
          ppm[3] = CHANNEL_DEFAULT_VALUE;
          ppm[4] = ch5;
@@ -248,11 +276,11 @@ void loop() {
     
       if ( x >= (-1 *LANDING_X_VALUE) && x <= LANDING_X_VALUE && y >= (-1 * LANDING_Y_VALUE) && y <= LANDING_Y_VALUE )
       {
-          ppm[0] = CHANNEL_DEFAULT_VALUE;
+          ppm[2] = CHANNEL_DEFAULT_VALUE;
           ppm[1] = CHANNEL_DEFAULT_VALUE;
-          Serial.println("Will land");
-          ppm[2] = THROTTLE_LANDING_VALUE + ( LANDING_SPEED_FACTOR * (LANDING_HEIGHT_VALUE - height) )     
-            
+          Serial.println("Will land with throttle speed of");
+          ppm[0] = THROTTLE_LANDING_VALUE + ( LANDING_SPEED_FACTOR * (LANDING_HEIGHT_VALUE - height) ); 
+          Serial.println(ppm[0]);
            /*if (height <= 50)
              {
               ppm[2] = 1200;
@@ -271,33 +299,33 @@ void loop() {
       {
           if (x >= LANDING_X_VALUE)
           {
-            ppm[0] = CHANNEL_DEFAULT_VALUE - TURNING_SPEED;
+            ppm[1] = CHANNEL_DEFAULT_VALUE - TURNING_SPEED;
             Serial.println("Will roll to the left");
           }
           else if (x <= (-1 * LANDING_X_VALUE) )
           {
-            ppm[0] = CHANNEL_DEFAULT_VALUE + TURNING_SPEED;
+            ppm[1] = CHANNEL_DEFAULT_VALUE + TURNING_SPEED;
             Serial.println("Will roll to the right");
           }
           else
           {
-            ppm[0] = CHANNEL_DEFAULT_VALUE;
+            ppm[1] = CHANNEL_DEFAULT_VALUE;
           }
   
           
           if (y >= LANDING_Y_VALUE)
           {
-             ppm[1] = CHANNEL_DEFAULT_VALUE - TURNING_SPEED; 
+             ppm[2] = CHANNEL_DEFAULT_VALUE - TURNING_SPEED; 
              Serial.println("Will pitch to bottom");    
           }
           else if (y <= (-1 * LANDING_Y_VALUE) )
           {
-            ppm[1] = CHANNEL_DEFAULT_VALUE + TURNING_SPEED;
+            ppm[2] = CHANNEL_DEFAULT_VALUE + TURNING_SPEED;
             Serial.println("Will pitch to up");
           }
           else
           {
-            ppm[0] = CHANNEL_DEFAULT_VALUE;
+            ppm[2] = CHANNEL_DEFAULT_VALUE;
           }
                 
        }
@@ -319,6 +347,5 @@ void loop() {
       Serial.println("");
       */
 
-  //delay(100);
     /*This delay is really needed, because anything less than 20ms will bog down the arduino and cause error because Arduino can't compute Computer Vision faster than this*/
 }
