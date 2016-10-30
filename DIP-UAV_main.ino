@@ -28,7 +28,6 @@
 #include <PinChangeInterrupt.h> // include hardware interrupt libraries to get PWM input without lot of delay (usually we use PulseIn which gives lot of delay)
 #define X_CENTER        ((PIXY_MAX_X-PIXY_MIN_X)/2)       
 #define Y_CENTER        ((PIXY_MAX_Y-PIXY_MIN_Y)/2)
-#define POLARITY -1
 
 Pixy pixy; // Create an instances of Pixy class named pixy
 
@@ -287,8 +286,8 @@ void loop() {
   if (objectFound == true && autoLand == true)
   {
 
-        x = (pixy.blocks[0].x) - 160 ;
-        y = -1 * ((pixy.blocks[0].y) - 100) ;
+        x = (pixy.blocks[0].x) - X_CENTER ;
+        y = -1 * ((pixy.blocks[0].y) - Y_CENTER) ;
         height = pixy.blocks[0].height;
         width = pixy.blocks[0].width;
 
@@ -359,8 +358,8 @@ void loop() {
             ppm[0] = throttleLast;
            }
             
-           rollError = POLARITY * (X_CENTER-pixy.blocks[0].x);
-           pitchError = POLARITY * (pixy.blocks[0].y - Y_CENTER);
+           rollError = x;
+           pitchError = y;
 
            rollLoop.update(rollError);
            pitchLoop.update(pitchError);
