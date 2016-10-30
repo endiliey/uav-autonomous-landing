@@ -1,6 +1,6 @@
 //////////////////////READ THIS///////////////////////////////
  /* Do not change anything if you don't know what you are doing
- *  26/10/16
+ *  31/10/16
  *  This is the on-board code for our drone
  *  It have 3 functions : getting PWM value from receiver (6 channels input), getting object coordinates (Computer Vision input) , and outputting PPM Signal to flight controller (1 output only) with some algorithm to make sure it can autoland / controlled manually
  *  Designed for DIP Project B Team 
@@ -45,8 +45,8 @@ class PWMLoop
  int32_t m_dgain;
 };
 
-PWMLoop rollLoop(500, 700);
-PWMLoop pitchLoop(300, 500);
+PWMLoop rollLoop(500, 500);
+PWMLoop pitchLoop(500, 500);
 
 PWMLoop::PWMLoop(int32_t pgain, int32_t dgain)
 {
@@ -345,19 +345,7 @@ void loop() {
           }
           
           Serial.println(ppm[0]);
-           /*if (height <= 50)
-             {
-              ppm[2] = 1200;
-             }
-             else if (height >= 50 && height <= 200)
-             {
-              ppm[2] = 1000;;
-             }
-             else if (height >= 200)
-             {
-              ppm[2] = 900;
-             }
-           */
+
       }
       else 
       {
@@ -419,21 +407,5 @@ void loop() {
        }
    
    }
-      
-     
-      /*Serial.print(ppm[0]);
-      Serial.print(" | ");
-      Serial.print(ppm[1]);
-      Serial.print(" | ");
-      Serial.print(ppm[2]);
-      Serial.print(" | ");
-      Serial.print(ppm[3]);
-      Serial.print(" | ");
-      Serial.print(ppm[4]);
-      Serial.print(" | ");
-      Serial.print(ppm[5]);
-      Serial.println("");
-      */
 
-    /*This delay is really needed, because anything less than 20ms will bog down the arduino and cause error because Arduino can't compute Computer Vision faster than this*/
 }
