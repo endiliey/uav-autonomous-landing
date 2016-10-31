@@ -32,6 +32,7 @@
 #define D_GAIN 500
 Pixy pixy; // Create an instances of Pixy class named pixy
 
+/*This is some sort of PID tuning*/
 class PWMLoop
 {
  public:
@@ -349,6 +350,7 @@ void loop() {
       }
       else 
       {
+       /*if its not within area of landing, use PWMLoop to auto-correct its position */
            if (descendBefore == true)
            {
             ppm[0] = throttleLast + LANDING_SPEED;
