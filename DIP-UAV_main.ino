@@ -10,7 +10,7 @@
 //////////////////////CONFIGURATION///////////////////////////////
 #define CHANNEL_NUMBER 6  //set the number of chanels
 #define CHANNEL_DEFAULT_VALUE 1500  //set the default servo value
-#define SWITCH_OFF_VALUE 1500 // set the default "off" switch value, in this case we use 900 because the Turnigy range from 900-2000
+#define SWITCH_OFF_VALUE 900 // set the default "off" switch value, in this case we use 900 because the Turnigy range from 900-2000
 #define SWITCH_ON_VALUE 1800 // set the default "on" switch value, in this case we use 2000
 #define FRAME_LENGTH 15000  //set the PPM frame length in microseconds (1ms = 1000µs)
 #define PULSE_LENGTH 300  //set the pulse length
@@ -21,14 +21,15 @@
 #define sigPin 8  //set PPM signal output pin on the arduino
 #define LANDING_X_VALUE 30 // set the desired landing area (more of error-tolerance within X)
 #define LANDING_Y_VALUE 30 // set the desired landing area (Y error-tolerance)
-#define TURNING_SPEED 50 // set the desired turning speed. The bigger it is, the faster the drones turn/ move itself for autolanding
+#define TURNING_SPEED 100 // set the desired maximum turning speed. The bigger it is, the faster the drones may turn/ move itself for autolanding
 #define LANDING_SPEED 25 // set the desired landing speed (make sure its around 100. Bigger numbers = faster throttle down for autolanding
 #include <SPI.h>  // include SPI interface, note that by using this, pin 10,11,12,13 cannot be used (take note for our project seriously)
 #include <Pixy.h> // include Pixy header files, this is the basic header to get Pixy method functioning
 #include <PinChangeInterrupt.h> // include hardware interrupt libraries to get PWM input without lot of delay (usually we use PulseIn which gives lot of delay)
 #define X_CENTER        ((PIXY_MAX_X-PIXY_MIN_X)/2)       
 #define Y_CENTER        ((PIXY_MAX_Y-PIXY_MIN_Y)/2)
-
+#define P_GAIN 500
+#define D_GAIN 500
 Pixy pixy; // Create an instances of Pixy class named pixy
 
 class PWMLoop
@@ -44,12 +45,12 @@ class PWMLoop
  int32_t m_dgain;
 };
 
-PWMLoop rollLoop(500, 500);
-PWMLoop pitchLoop(500, 500);
+PWMLoop rollLoop(P_GAIN,D_GAIN);
+PWMLoop pitchLoop(P_GAIN, D_GAIN);
 
 PWMLoop::PWMLoop(int32_t pgain, int32_t dgain)
 {
-  m_pos = 1500;
+  m_pos = CHANNEL_DEFAULT_VALUE;
   m_pgain = pgain;
   m_dgain = dgain;
   m_prevError = 0x80000000L;
@@ -62,10 +63,10 @@ void PWMLoop::update(int32_t error)
   {  
     vel = (error*m_pgain + (error - m_prevError)*m_dgain)>>10;
     m_pos += vel;
-    if (m_pos> 1600) 
-      m_pos = 1600; 
-    else if (m_pos < 1400) 
-      m_pos = 1400;
+    if (m_pos> CHANNEL_DEFAULT_VALUE + TURNING_SPEED) 
+      m_pos = CHANNEL_DEFAULT_VALUE + TURNING_SPEED; 
+    else if (m_pos < CHANNEL_DEFAULT_VALUE - TURNING_SPEED) 
+      m_pos = CHANNEL_DEFAULT_VALUE - TURNING_SPEED;
   }
   m_prevError = error;
 }
@@ -265,7 +266,7 @@ void loop() {
           //Serial.println("Object not found");
          }  
  
-         if ( ch5 <= SWITCH_OFF_VALUE)
+         if ( ch5 >= SWITCH_OFF_VALUE && ch5 <= SWITCH_ON_VALUE)
          {
           autoLand = false;
          }
