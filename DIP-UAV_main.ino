@@ -1,6 +1,6 @@
 //////////////////////READ THIS///////////////////////////////
  /* Do not change anything if you don't know what you are doing
- *  31/10/16
+ *  2/11/16
  *  This is the on-board code for our drone
  *  It have 3 functions : getting PWM value from receiver (6 channels input), getting object coordinates (Computer Vision input) , and outputting PPM Signal to flight controller (1 output only) with some algorithm to make sure it can autoland / controlled manually
  *  Designed for DIP Project B Team 
@@ -16,7 +16,6 @@
 #define PULSE_LENGTH 300  //set the pulse length
 #define THROTTLE_LANDING_VALUE 900 // please change this with the value of throttle when its going to DESCEND (THE 900 VALUE IS ASSUMPTION BY ENDI)
 #define LANDING_HEIGHT_VALUE 50 // please change this with the value of object height when the drones are very near with the object (like ~20cm distant apart)
-#define LANDING_WIDTH_VALUE 200 // please change this with the value of object width when the drones are very near with the object (like ~20cm distant apart)
 #define onState 1  //set polarity of the pulses: 1 is positive, 0 is negative
 #define sigPin 8  //set PPM signal output pin on the arduino
 #define LANDING_X_VALUE 20 // set the desired landing area (more of error-tolerance within X)
@@ -28,17 +27,17 @@
 #include <PinChangeInterrupt.h> // include hardware interrupt libraries to get PWM input without lot of delay (usually we use PulseIn which gives lot of delay)
 #define X_CENTER        ((PIXY_MAX_X-PIXY_MIN_X)/2)       
 #define Y_CENTER        ((PIXY_MAX_Y-PIXY_MIN_Y)/2)
-#define P_GAIN 50
+#define P_GAIN 200
 #define I_GAIN 150
 #define D_GAIN 50
 
 Pixy pixy; // Create an instances of Pixy class named pixy
 
-/*This is some sort of PID tuning*/
-class PWMLoop
+/*Creating a class to store our PID tuning*/
+class PIDLoop
 {
  public:
- PWMLoop(int32_t pgain, int32_t igain, int32_t dgain);
+ PIDLoop(int32_t pgain, int32_t igain, int32_t dgain);
 
  void update(int32_t error);
 
@@ -50,10 +49,12 @@ class PWMLoop
  int32_t m_sumError;
 };
 
-PWMLoop rollLoop(P_GAIN, I_GAIN, D_GAIN);
-PWMLoop pitchLoop(P_GAIN, I_GAIN, D_GAIN);
+/*PIDLoop Hard-coded Constructor*/
+PIDLoop rollLoop(P_GAIN, I_GAIN, D_GAIN);
+PIDLoop pitchLoop(P_GAIN, I_GAIN, D_GAIN);
 
-PWMLoop::PWMLoop(int32_t pgain, int32_t igain, int32_t dgain)
+/*PIDLoop Constructor*/
+PIDLoop::PIDLoop(int32_t pgain, int32_t igain, int32_t dgain)
 {
   m_pos = CHANNEL_DEFAULT_VALUE;
   m_pgain = pgain;
@@ -63,7 +64,8 @@ PWMLoop::PWMLoop(int32_t pgain, int32_t igain, int32_t dgain)
   m_sumError = 0;
 }
 
-void PWMLoop::update(int32_t error)
+/*PIDLoop Method*/
+void PIDLoop::update(int32_t error)
 {
   long int vel;
   
@@ -90,7 +92,6 @@ volatile long channel_length[] = {0,0,0,0,0,0};
 int x;
 int y;
 int height;
-int width;
 bool autoLand = false;
 bool objectFound = false;
 int throttleLast;
@@ -285,9 +286,7 @@ void loop() {
         x = (pixy.blocks[0].x) - X_CENTER ;
         y = -1 * ((pixy.blocks[0].y) - Y_CENTER) ;
         height = pixy.blocks[0].height;
-        width = pixy.blocks[0].width;
         
-
   /*This part is only for debugging, we will comment this out later on */
             /*Serial.println("Detected: ");
             Serial.println("x    y    height  width");
@@ -306,7 +305,8 @@ void loop() {
     Timer running in the background will take care of the rest and automatically 
     generate PPM signal on output pin using values in ppm array
     */
-  //previously it should be objectFound == false || autoLand == false
+  /*previously it should be objectFound == false || autoLand == false
+  Only if autoLand is not ON it will be manual mode */
    if ( autoLand == false )
    {  
       Serial.println("MANUAL MODE");
