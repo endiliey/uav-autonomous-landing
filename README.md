@@ -53,3 +53,14 @@ Using concept of PID, we'll adjust the PWM Value.
 http://www.robolink.com/basics-of-codrone-control/
 #####2. Throttle, Roll, Yaw and Pitch value is a PWM (Pulse width modulation) value ranging between 900 to 2000 (with 900 = low, 1500 = default, 2000 = HIGH)
 Example : A roll PWM Value of 2000 will means that the drone will tilt to the right aggresively
+
+## P,I,D value test "trial and error" method
+"Trial and error method" setting of PID parameters recommended steps: 1, Ki and Kd to 0, no need integral and differential;
+2, the Kp values starting from 0 and increases slowly, which observe whether response reaction speed is within our request;
+3, when the response of reaction rate meet our requirements, stop increasing Kp values;
+4, on this basis of the Kp value decreased by 10%;
+5, the Ki values starting from 0 and increases slowly;
+6, when the pressure fluctuations, stop to increase Ki value;
+7, on this basis of the Ki value decreased by 10%;
+8, the Kd values starting from 0 and increases slowly, which observe whether stress reaction speed is within our request;
+
