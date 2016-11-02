@@ -41,8 +41,12 @@ Calling all drones hobbyist/hackers/makers/etc
 #####1. x,y is the cartesian coordinates in x-y plane with x = 0, y =0 in the middle
 #####2.assume height = 200 means object is within 10 cm of Target, while height = 50 means object is within 160 cm from object)
 
-###Output : value of Throttle, Roll, Yaw and Pitch 
+###Output : 
+value of Throttle, Roll, Yaw and Pitch 
 (such that the Drone will land in the center of Target (assume |x,y| = |10,10| )
+
+##Initial Solution
+Using concept of PID, we'll adjust the PWM Value. 
 
 ####Output info :
 #####1. Basic drones control
