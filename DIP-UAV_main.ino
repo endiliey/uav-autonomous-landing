@@ -21,22 +21,24 @@
 #define sigPin 8  //set PPM signal output pin on the arduino
 #define LANDING_X_VALUE 20 // set the desired landing area (more of error-tolerance within X)
 #define LANDING_Y_VALUE 20 // set the desired landing area (Y error-tolerance)
-#define TURNING_SPEED 50 // set the desired maximum turning speed. The bigger it is, the faster the drones may turn/ move itself for autolanding
+#define TURNING_SPEED 200 // set the desired maximum turning speed. The bigger it is, the faster the drones may turn/ move itself for autolanding
 #define LANDING_SPEED 25 // set the desired landing speed (make sure its around 100. Bigger numbers = faster throttle down for autolanding
 #include <SPI.h>  // include SPI interface, note that by using this, pin 10,11,12,13 cannot be used (take note for our project seriously)
 #include <Pixy.h> // include Pixy header files, this is the basic header to get Pixy method functioning
 #include <PinChangeInterrupt.h> // include hardware interrupt libraries to get PWM input without lot of delay (usually we use PulseIn which gives lot of delay)
 #define X_CENTER        ((PIXY_MAX_X-PIXY_MIN_X)/2)       
 #define Y_CENTER        ((PIXY_MAX_Y-PIXY_MIN_Y)/2)
-#define P_GAIN 150
-#define D_GAIN 150
+#define P_GAIN 50
+#define I_GAIN 150
+#define D_GAIN 50
+
 Pixy pixy; // Create an instances of Pixy class named pixy
 
 /*This is some sort of PID tuning*/
 class PWMLoop
 {
  public:
- PWMLoop(int32_t pgain, int32_t dgain);
+ PWMLoop(int32_t pgain, int32_t igain, int32_t dgain);
 
  void update(int32_t error);
 
@@ -44,30 +46,37 @@ class PWMLoop
  int32_t m_prevError;
  int32_t m_pgain;
  int32_t m_dgain;
+ int32_t m_igain;
+ int32_t m_sumError;
 };
 
-PWMLoop rollLoop(P_GAIN,D_GAIN);
-PWMLoop pitchLoop(P_GAIN, D_GAIN);
+PWMLoop rollLoop(P_GAIN, I_GAIN, D_GAIN);
+PWMLoop pitchLoop(P_GAIN, I_GAIN, D_GAIN);
 
-PWMLoop::PWMLoop(int32_t pgain, int32_t dgain)
+PWMLoop::PWMLoop(int32_t pgain, int32_t igain, int32_t dgain)
 {
   m_pos = CHANNEL_DEFAULT_VALUE;
   m_pgain = pgain;
   m_dgain = dgain;
+  m_igain = igain;
   m_prevError = 0x80000000L;
+  m_sumError = 0;
 }
 
 void PWMLoop::update(int32_t error)
 {
   long int vel;
+  
+  m_sumError += error;
+  
   if (m_prevError!=0x80000000)
   {  
-    vel = (error*m_pgain + (error - m_prevError)*m_dgain)>>10;
+    vel = (error*m_pgain + m_sumError*m_igain + (error - m_prevError)*m_dgain)>>10;
     m_pos += vel;
-    if (m_pos> CHANNEL_DEFAULT_VALUE + TURNING_SPEED/2) 
-      m_pos = CHANNEL_DEFAULT_VALUE + TURNING_SPEED/2; 
-    else if (m_pos < CHANNEL_DEFAULT_VALUE - 3*TURNING_SPEED) 
-      m_pos = CHANNEL_DEFAULT_VALUE - 3*TURNING_SPEED;
+    if (m_pos> CHANNEL_DEFAULT_VALUE + TURNING_SPEED) 
+      m_pos = CHANNEL_DEFAULT_VALUE + TURNING_SPEED; 
+    else if (m_pos < CHANNEL_DEFAULT_VALUE - TURNING_SPEED) 
+      m_pos = CHANNEL_DEFAULT_VALUE - TURNING_SPEED;
   }
   m_prevError = error;
 }
@@ -297,8 +306,8 @@ void loop() {
     Timer running in the background will take care of the rest and automatically 
     generate PPM signal on output pin using values in ppm array
     */
-
-   if ( objectFound == false || autoLand == false )
+  //previously it should be objectFound == false || autoLand == false
+   if ( autoLand == false )
    {  
       Serial.println("MANUAL MODE");
       ppm[0] = throttle;
