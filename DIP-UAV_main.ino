@@ -2,7 +2,7 @@
   DIP Unmanned Aerial Vehicles- Arduino Nano Code
 
   created 14 Sept 2016
-  Last modified 4 Nov 2016
+  Last modified 4 Nov 2016 3:11 pm
   
   This code is the on-board code for our Arduino Nano that
   acts as an intermediary between Naze32 Flight controller and
@@ -19,7 +19,7 @@
   More can be found on
   https://github.com/endiliey/DIP-UAV
 
-  Coder : Endilie Yacop Sucipto
+  Coder in-charge: Endilie Yacop Sucipto
   Contributor : Tee Chin Kiat and Dou Zi
 
 */
@@ -52,7 +52,7 @@
 #define I_CONSTANT 6 // set the integral gain constant
 #define D_CONSTANT 0.8 // set the derivative gain constant
 
-Pixy pixy; // Create an instances of Pixy class named pixy
+
 
 /*this array is the global variables needed to get and store PWM valuee*/
 const byte channel_pin[] = {2,3,4,5,6,7}; // we use pin 2,3,4,5,6,7 for PWM input
@@ -65,7 +65,8 @@ volatile long pitch; // store received pitch PWM value
 volatile long ch5; // store received ch5 PWM value
 volatile long ch6; // store received ch6 PWM value
 
-/*these are the global variables needed for Computer Vision & autoLanding algorithm */ 
+/*these are the setup and global variables needed for Computer Vision & autoLanding algorithm */ 
+Pixy pixy; // Create an instances of Pixy class named pixy
 int x; // store x value from Pixy camera
 int y; // store y value from Pixy camera
 int height; // store y value from Pixy camera 
@@ -248,7 +249,7 @@ void loop() {
       height = pixy.blocks[0].height;
   
       rollInput = (double)x; // set x as the roll PID input
-      pitchInput = (double)y; // set y as the roll PID input
+      pitchInput = (double)y; // set y as the pitch PID input
       
      }  
      else {
