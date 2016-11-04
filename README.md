@@ -1,7 +1,7 @@
 # DIP UAV 
 
 ##About this project:
-This project is mainly about coding our Quadcopter to fulfill the collaborative mission between UAV (Unmanned Aerial Vehicle) and USV (Unmanned Surface Vehicle)
+This project is mainly about coding our Arduino Nano to fulfill the collaborative mission between UAV (Unmanned Aerial Vehicle) and USV (Unmanned Surface Vehicle)
 
 ##Main Hardware Used (exclude the cables,motors,etc) :
 - Naze32 ~ flight controller with Cleanflight firmware
