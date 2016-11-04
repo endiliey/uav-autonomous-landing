@@ -71,8 +71,7 @@ int x; // store x value from Pixy camera
 int y; // store y value from Pixy camera
 int height; // store y value from Pixy camera 
 bool autoLand = false; // store boolean to check whether drone is in autoland mode
-bool objectFound = false; // store boolean to check whether drone detect an object (the landing pad) 
-int throttleLast; // store the last throttle value before going to autoLand mode 
+bool objectFound = false; // store boolean to check whether drone detect an object (the landing pad)  
 bool descendBefore = false ; // boolean to check whether drone have descend before
 
 /*this array holds the PWM values for the generated PPM signal 
@@ -254,7 +253,7 @@ void loop() {
      }  
      else {
       objectFound = false;
-      digitalWrite(ledPin, LOW); // turn of LED light
+      digitalWrite(ledPin, LOW); // turn off LED light
      }  
   
      /*Check if switch for auto land mode is on */
@@ -265,7 +264,7 @@ void loop() {
      {
           if (autoLand == false){
             autoLand = true; 
-            throttleLast = throttle; // store last throttle value  
+            ppm[0] = throttle; // set throttle value to be last throttle value  
           }
           else {
             autoLand = true;
@@ -342,7 +341,7 @@ void loop() {
                 /*if copter is within desired area, it will descend down slowly */
                 if ( x >= (-1 *LANDING_X_VALUE) && x <= LANDING_X_VALUE && y >= (-1 * LANDING_Y_VALUE) && y <= LANDING_Y_VALUE ){
                     descendBefore = true;
-                    ppm[0] = throttleLast - LANDING_SPEED; // decrease throttle down abit to make it descend    
+                    ppm[0] = ppm[0] - LANDING_SPEED; // decrease throttle down abit to make it descend    
                  }
                 else {
                 /*if copter is not within desired area and it descend before, it will try to maintain its altitude*/
@@ -350,10 +349,6 @@ void loop() {
                         ppm[0] = ppm[0] + LANDING_SPEED; // increase throttle value back to maintain its altitude
                         descendBefore = false;
                      }
-                     else {
-                        ppm[0] = throttleLast; // set throttle value to be last throttle value
-                     }
-                 
                 }
    
               }
