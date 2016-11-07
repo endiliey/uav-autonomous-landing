@@ -2,7 +2,8 @@
   DIP Unmanned Aerial Vehicles- Arduino Nano Code
 
   created 14 Sept 2016
-  Last modified 4 Nov 2016 3:11 pm
+  Last modified 7 Nov 2016 8:11 pm
+  by Endilie Yacop Sucipto
 
   This code is the on-board code for our Arduino Nano that
   acts as an intermediary between Naze32 Flight controller and
