@@ -2,7 +2,8 @@
   DIP Unmanned Aerial Vehicles- Arduino Nano Code
 
   created 14 Sept 2016
-  Last modified 4 Nov 2016 3:11 pm
+  Last modified 10 Nov 2016 10:11 pm 
+  by Endi
 
   This code is the on-board code for our Arduino Nano that
   acts as an intermediary between Naze32 Flight controller and
@@ -30,7 +31,6 @@
 #include <PinChangeInterrupt.h> // include arduino hardware interrupt (pin change interrupt) library
 #include <PID_v1.h> // include PID (proportional, integral and derivative) library
 
-
 /*defining macros for easier configuration*/
 #define CHANNEL_NUMBER 6  //set the number of chanels
 #define CHANNEL_DEFAULT_VALUE 1500  //set the default pwm value
@@ -39,9 +39,9 @@
 #define FRAME_LENGTH 15000  //set the PPM frame length in microseconds (1ms = 1000Âµs)
 #define PULSE_LENGTH 300  //set the pulse length (spacing) between each pulse in PPM
 #define THROTTLE_LANDING_VALUE 900 // set the throttle landing value
-#define LANDING_HEIGHT_VALUE 70 // set the desired height of landing pad for the the drone to land
-#define LANDING_WIDTH_VALUE 70 // set the desired width of landing pad for the drone to land
-#define LANDING_SIZE_VALUE (LANDING_HEIGHT_VALUE*LANDING_WIDTH_VALUE) // set the desired condition size of landing pad to land 
+#define LANDING_HEIGHT_VALUE 50 // set the desired height of landing pad for the the drone to land
+#define LANDING_WIDTH_VALUE 50 // set the desired width of landing pad for the drone to land
+#define LANDING_SIZE_VALUE LANDING_WIDTH_VALUE * LANDING_HEIGHT_VALUE // set the desired condition size of landing pad to land 
 #define onState 1  //set polarity of the pulses: 1 is positive, 0 is negative
 #define sigPin 8  //set PPM signal output pin on the arduino
 #define LANDING_X_VALUE 10 // set the desired landing area (more of error-tolerance within X)
@@ -51,11 +51,6 @@
 #define X_CENTER ((PIXY_MAX_X-PIXY_MIN_X)/2) // set the center "X" value of pixy       
 #define Y_CENTER ((PIXY_MAX_Y-PIXY_MIN_Y)/2) // set the center "Y" value of pixy
 #define ledPin 9 // set LED output pin on the arduino
-#define P_CONSTANT 1.3 // set the proportional gain constant
-#define I_CONSTANT 6.2 // set the integral gain constant
-#define D_CONSTANT 1.02 // set the derivative gain constant
-
-
 
 /*this array is the global variables needed to get and store PWM valuee*/
 const byte channel_pin[] = {2, 3, 4, 5, 6, 7}; // we use pin 2,3,4,5,6,7 for PWM input
@@ -88,9 +83,9 @@ int ppm[CHANNEL_NUMBER];
 /*these are the global variables needed for our PID tuning*/
 double rollInput; // Error of roll, in this case is "X", we want it to be equal to setpoint
 double pitchInput; // Error of pitch, in this case is "Y", we want it to be equal to setpoint
-double Kp = P_CONSTANT ; // Proportional gain constant
-double Ki = I_CONSTANT ; // Integral gain constant
-double Kd = D_CONSTANT ; // Derivative gain constant
+double Kp = 0.2 ; // Proportional gain constant
+double Ki = 0.6 ; // Integral gain constant
+double Kd = 0.05 ; // Derivative gain constant
 double Setpoint = 0; // desired setpoint (we want the drone to be exactly in the middle)
 double rollOutput; // the PID adjusted PWM value of roll to achieve input to be equal to setpoint
 double pitchOutput; // the PID adjusted PWM value of pitch to achieve input to be equal to setpoint
@@ -100,7 +95,6 @@ double pitchFinal; // store CHANNEL_DEFAULT_VALUE + pitchOutput PWM value
 /*Construct two classes of PID and passing it several pointers */
 PID rollPID(&rollInput, &rollOutput, &Setpoint, Kp, Ki, Kd, REVERSE);
 PID pitchPID(&pitchInput, &pitchOutput, &Setpoint, Kp, Ki, Kd, REVERSE  );
-
 
 void setup()
 {
@@ -115,12 +109,10 @@ void setup()
   /*initialize default ppm values */
   for (int i = 0; i < CHANNEL_NUMBER; i++)
   {
-    if ( i == 5 || i == 6)
-    {
+    if ( i == 5 || i == 6) {
       ppm[i] = SWITCH_OFF_VALUE;
     }
-    else
-    {
+    else {
       ppm[i] = CHANNEL_DEFAULT_VALUE;
     }
   }
@@ -160,12 +152,6 @@ void setup()
 
   /*Initialization for our pixy camera*/
   pixy.init();
-
-
-  // This is only for debugging (using Serial port to see if it's working properly, it will be commented out later on
-  Serial.begin(9600);
-  Serial.println("Starting soon.. ");
-
 }
 
 /*This is processPin function that get the PWM value from each pin by recording
@@ -174,12 +160,10 @@ void processPin(byte pin)
 {
   uint8_t trigger = getPinChangeInterruptTrigger(digitalPinToPCINT(channel_pin[pin]));
 
-  if (trigger == RISING)
-  {
+  if (trigger == RISING){
     rising_start[pin] = micros();
   }
-  else if (trigger == FALLING)
-  {
+  else if (trigger == FALLING){
     channel_length[pin] = micros() - rising_start[pin];
   }
 }
@@ -206,37 +190,28 @@ void onRising5(void) {
 
 
 //timer that will handle the PPM Signal Generation//
-ISR(TIMER1_COMPA_vect)
-{
+ISR(TIMER1_COMPA_vect){
   static boolean state = true;
-
   TCNT1 = 0;
-
-  if (state)
-  {
+  if (state){
     //start pulse
     digitalWrite(sigPin, onState);
     OCR1A =  PULSE_LENGTH * 2;
     state = false;
   }
-  else
-  {
+  else{
     //end pulse and calculate when to start the next pulse
     static byte cur_chan_numb;
     static unsigned int calc_rest;
-
     digitalWrite(sigPin, !onState);
     state = true;
-
-    if (cur_chan_numb >= CHANNEL_NUMBER)
-    {
+    if (cur_chan_numb >= CHANNEL_NUMBER){
       cur_chan_numb = 0;
       calc_rest = calc_rest + PULSE_LENGTH;//
       OCR1A = (FRAME_LENGTH - calc_rest) * 2;
       calc_rest = 0;
     }
-    else
-    {
+    else{
       OCR1A = (ppm[cur_chan_numb] - PULSE_LENGTH) * 2;
       calc_rest = calc_rest + ppm[cur_chan_numb];
       cur_chan_numb++;
@@ -244,13 +219,7 @@ ISR(TIMER1_COMPA_vect)
   }
 }
 
-
-
 void loop() {
-
-  Serial.print(x);
-  Serial.print("|");
-  Serial.println(y);
   /*This store the PWM Value that we get to its respective variable (just for easier readability)*/
   throttle = channel_length[0];
   roll = channel_length[1];
@@ -260,62 +229,38 @@ void loop() {
   ch6 = channel_length[5];
 
   /*Check if pixy camera detect object (landing pad)*/
-  if ( pixy.getBlocks() > 0 )
-  {
+  if ( pixy.getBlocks() > 0 ){
     objectFound = true;
-    digitalWrite(ledPin, HIGH);
+    digitalWrite(ledPin, HIGH); // turn on red LED to indicate that it has found an object
   }
-  else
-  {
+  else{
     objectFound = false;
     digitalWrite(ledPin, LOW);
   }
 
   /*Check if switch for auto land mode is on */
-  if ( ch5 <= CHANNEL_DEFAULT_VALUE)
-  {
+  if ( ch5 <= CHANNEL_DEFAULT_VALUE){
     autoLand = false;
   }
-  else if ( ch5 >= CHANNEL_DEFAULT_VALUE )
-  {
-    if (autoLand == false)
-    {
+  else if ( ch5 >= CHANNEL_DEFAULT_VALUE ){
+    if (autoLand == false){
       autoLand = true;
       throttleLast = throttle;
-
     }
-    else
-    {
+    else{
       autoLand = true;
     }
   }
 
-
   /*This part is only for debugging, we will comment this out later on */
-  if (objectFound == true)
-  {
-
+  if (objectFound == true){
     x = X_CENTER - pixy.blocks[0].x  ;
     y = (pixy.blocks[0].y) - Y_CENTER ;
     height = pixy.blocks[0].height;
     width = pixy.blocks[0].width;
-    objectSize+= height*width;
-    objectSize-= objectSize >>3;
-
+    objectSize = height * width;
     rollInput = (double)x;
     pitchInput = (double)y;
-
-    /*This part is only for debugging, we will comment this out later on */
-    /*Serial.println("Detected: ");
-      Serial.println("x    y    height  width");
-      Serial.print(x); //this will be the x value of object detected by Pixy
-      Serial.print("    ");
-      Serial.print(y); // this will be the y value of object detected by Pixy
-      Serial.print("    ");
-      Serial.print(height);// this will be the width of object detected by pixy
-      Serial.print("    ");
-      Serial.println(width); // this will be the height of object detected by pixy
-    */
   }
 
   /*
@@ -328,9 +273,7 @@ void loop() {
 
   /*if auto land is false, arduino will just pass the received PWM value directly to the
     flight controller (manual mode)*/
-  if ( autoLand == false )
-  {
-    cutOff = false;
+  if ( autoLand == false ){
     ppm[0] = throttle;
     ppm[1] = roll;
     ppm[2] = pitch;
@@ -343,104 +286,58 @@ void loop() {
     ppm[3] = yaw;
     ppm[4] = ch5;
     ppm[5] = ch6;
-    Serial.println(objectSize);
 
-    /*if UAV is within desired height, it will throttle down and cut off power*/
-    if (objectSize >= LANDING_SIZE_VALUE)
+    if (objectSize >= LANDING_SIZE_VALUE )
     {
-      Serial.println("LANDING PERFECTLY, CUT THROTTLE");
-      cutOff = true;
+      cutOff == true;
       ppm[0] = THROTTLE_LANDING_VALUE;
       ppm[1] = CHANNEL_DEFAULT_VALUE;
       ppm[2] = CHANNEL_DEFAULT_VALUE;
     }
-    else
+    else if (cutOff == false)
     {
-      /*PID Tuning to make UAV centered */
-      rollPID.Compute(); // roll PID will compute adjusted PWM value and store it to roll Output
-      pitchPID.Compute(); // pitch PID will compute the adjusted PWM value and store it to pitchOutput
-      rollFinal = CHANNEL_DEFAULT_VALUE + rollOutput; // adjust final PWM value that will be outputted
-      pitchFinal = CHANNEL_DEFAULT_VALUE + pitchOutput; // adjust final PWM value that will be outputted
-
-      /*To make sure our UAV is turning within our desired turning speed limit*/
-
-      if (rollFinal > CHANNEL_DEFAULT_VALUE + TURNING_SPEED)
-      {
-        rollFinal = CHANNEL_DEFAULT_VALUE + TURNING_SPEED;
-      }
-      else if (rollFinal < CHANNEL_DEFAULT_VALUE - TURNING_SPEED)
-      {
-        rollFinal = CHANNEL_DEFAULT_VALUE - TURNING_SPEED;
-      }
-      if (pitchFinal > CHANNEL_DEFAULT_VALUE + TURNING_SPEED)
-      {
-        pitchFinal = CHANNEL_DEFAULT_VALUE + TURNING_SPEED;
-      }
-      else if (pitchFinal < CHANNEL_DEFAULT_VALUE - TURNING_SPEED)
-      {
-        pitchFinal = CHANNEL_DEFAULT_VALUE - TURNING_SPEED;
-      }
-
-      ppm[1] = (int)rollFinal; // Arduino output adjusted roll PWM value to flight controller
-      ppm[2] = (int)pitchFinal; // Arduino output adjusted pitch PWM value to flight controller
-
-      if (cutOff == false)
-      {
+      
+    /*PID Tuning to make UAV centered */
+          rollPID.Compute(); // roll PID will compute adjusted PWM value and store it to roll Output
+          pitchPID.Compute(); // pitch PID will compute the adjusted PWM value and store it to pitchOutput
+          rollFinal = CHANNEL_DEFAULT_VALUE + rollOutput; // adjust final PWM value that will be outputted
+          pitchFinal = CHANNEL_DEFAULT_VALUE + pitchOutput; // adjust final PWM value that will be outputted
+      
+          /*To make sure our UAV is turning within our desired turning speed limit*/
+          if (rollFinal > CHANNEL_DEFAULT_VALUE + TURNING_SPEED){
+            rollFinal = CHANNEL_DEFAULT_VALUE + TURNING_SPEED;
+          }
+          else if (rollFinal < CHANNEL_DEFAULT_VALUE - TURNING_SPEED){
+            rollFinal = CHANNEL_DEFAULT_VALUE - TURNING_SPEED;
+          }
+          if (pitchFinal > CHANNEL_DEFAULT_VALUE + TURNING_SPEED){
+            pitchFinal = CHANNEL_DEFAULT_VALUE + TURNING_SPEED;
+          }
+          else if (pitchFinal < CHANNEL_DEFAULT_VALUE - TURNING_SPEED){
+            pitchFinal = CHANNEL_DEFAULT_VALUE - TURNING_SPEED;
+          }
+      
+          ppm[1] = (int)rollFinal; // Arduino output adjusted roll PWM value to flight controller
+          ppm[2] = (int)pitchFinal; // Arduino output adjusted pitch PWM value to flight controller
+      
           /*if copter is within desired area, it will descend down slowly */
-          if ( x >= (-1 * LANDING_X_VALUE) && x <= LANDING_X_VALUE && y >= (-1 * LANDING_Y_VALUE) && y <= LANDING_Y_VALUE )
-          {
-            Serial.println("Perfect, throttling down");
-            Serial.println(objectSize);
+          if ( abs(x) <= LANDING_X_VALUE && abs(y) <= LANDING_Y_VALUE){
             ppm[0] = throttleLast - LANDING_SPEED; // decrease throttle down abit to make it descend
             descendBefore = true;
-            
           }
-          else
-          {
+          else{
             /*if copter is not within desired area and it descend before, it will try to maintain its altitude*/
             if (descendBefore == true) {
               ppm[0] = throttleLast + LANDING_SPEED; // increase throttle value back to maintain its altitude
               descendBefore = false;
             }
-            else
-            {
+            else{
               ppm[0] = throttleLast;
             }
           }
-
-           if (x >= LANDING_X_VALUE)
-                                {
-                                 Serial.println("Will roll to the right");
-                                }
-                                else if (x <= (-1 * LANDING_X_VALUE) )
-                                {
-                                  Serial.println("Will roll to the left");
-                                }
-                                else
-                                {
-                                  Serial.println("X is good");
-                                }
-                      
-                              
-                                if (y >= LANDING_Y_VALUE)
-                                  {
-                                     Serial.println("Will pitch to top");    
-                                  }
-                                else if (y <= (-1 * LANDING_Y_VALUE) )
-                                  {
-                                    Serial.println("Will pitch to bottom");
-                                  }
-                                else
-                                  {
-                                    Serial.println("Y is good");
-                                  }
-      
-      }
-      
-
     }
-
   }
 
 }
+
 
