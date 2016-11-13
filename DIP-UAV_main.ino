@@ -289,7 +289,7 @@ void loop() {
 
     if (objectSize >= LANDING_SIZE_VALUE )
     {
-      cutOff == true;
+      cutOff = true;
       ppm[0] = THROTTLE_LANDING_VALUE;
       ppm[1] = CHANNEL_DEFAULT_VALUE;
       ppm[2] = CHANNEL_DEFAULT_VALUE;
