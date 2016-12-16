@@ -1,5 +1,8 @@
 # DIP UAV 
 
+### Click image below to watch the project short video
+[![Short Video of Completed Project](https://s24.postimg.org/gmpmuce1x/Quadcopter.png)](https://youtu.be/2tRe5EXvatU)
+
 ##About this project:
 This project is mainly about coding our Arduino Nano to fulfill the collaborative mission between UAV (Unmanned Aerial Vehicle) and USV (Unmanned Surface Vehicle)
 
@@ -20,4 +23,4 @@ When switch channel 5 is turned on, our copter will detect the landing platform 
 ###2. Manual mode
 When switch channel 5 is turned off, our copter will be manually controlled by our radio controller.
 
-## Project Progress : Completed
+## Project Progress : Completed (Discontinued)
