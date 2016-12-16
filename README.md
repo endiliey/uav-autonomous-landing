@@ -26,3 +26,5 @@ When switch channel 5 is turned off, our copter will be manually controlled by o
 
 ## Project Progress : Completed (Discontinued)
 ![Image of Quadcopter](https://s30.postimg.org/538aoekb5/20161105_172654.jpg)
+
+## Special Thanks to: Tee Chin Kiat and Dou Zi
