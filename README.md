@@ -1,6 +1,6 @@
 # Quadcopter Autonomous Landing (using Naze32 + Arduino Nano)
-
-### Click image below to watch the project short video
+### [https://youtu.be/2tRe5EXvatU!](https://youtu.be/2tRe5EXvatU)
+### or click image below
 [![Short Video of Completed Project](https://s24.postimg.org/8t7vgq5h1/Quadcopter.png)](https://youtu.be/2tRe5EXvatU)
 
 ##About this project:
