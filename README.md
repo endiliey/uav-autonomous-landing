@@ -4,6 +4,9 @@
 ## About this project:
 This project is mainly about coding our Arduino Nano to fulfill the collaborative mission between UAV (Unmanned Aerial Vehicle) and USV (Unmanned Surface Vehicle)
 
+# Disclaimer
+This is an educational project developed many years ago and not meant to be developed further. Use with **caution**
+
 ## Main Hardware Used (exclude the cables,motors,etc) :
 
 ![Hardware](./img/uav-info.png)
@@ -14,7 +17,6 @@ This project is mainly about coding our Arduino Nano to fulfill the collaborativ
 - Arduino Nano ~ as the brain of our quadcopter
 - Pixy Camera ~ for our On-board object detector
 
-## Programming Language : C with Arduino IDE
 ## What are we doing ? 
 ![Image of Control Flow](./img/uav-flow.png)
 
@@ -33,8 +35,5 @@ When switch channel 5 is turned on, our copter will detect the landing platform 
 
 ### 2. Manual mode
 When switch channel 5 is turned off, our copter will be manually controlled by our radio controller.
-
-# Disclaimer
-This is an educational project developed many years ago and not meant to be developed further.
 
 ## Special Thanks to: Tee Chin Kiat and Dou Zi
